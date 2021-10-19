@@ -8,10 +8,7 @@
 import UIKit
 
 enum RouterType {
-    case tabbar
-    case dashboard
-    case login
-    case github
+    case category
 }
 
 class AppRouter {
@@ -39,23 +36,10 @@ class AppRouter {
 extension RouterType {
     func getVc() -> UIViewController {
         switch self {
-        case .tabbar:
-            let vc = UIStoryboard(name: Constants.tabbar, bundle: nil).instantiateViewController(ofType: TabbarViewController.self)
-            return vc
-        case .dashboard:
-            let vc = UIStoryboard(name: Constants.dashbord, bundle: nil).instantiateViewController(ofType: DashboardViewController.self)
-            let viewModel = DashboardViewModel()
-            vc.viewModel = viewModel
-            return vc
-        case .login:
-            let vc = UIStoryboard(name: Constants.authentication, bundle: nil).instantiateViewController(ofType: LoginViewController.self)
-            let viewModel = LoginViewModel()
-            vc.viewModel = viewModel
-            return vc
-        case .github:
-            let vc = UIStoryboard(name: Constants.github, bundle: nil).instantiateViewController(ofType: GithubViewController.self)
-            let viewModel = GithubViewModel()
-            vc.viewModel = viewModel
+        case .category:
+            let vc = UIStoryboard(name: Constants.category, bundle: nil).instantiateViewController(ofType: CategoryViewController.self)
+//            let viewModel = GithubViewModel()
+//            vc.viewModel = viewModel
             return vc
         }
     }

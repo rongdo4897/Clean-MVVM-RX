@@ -11,5 +11,6 @@ import UIKit
 struct ResponseServerEntity<T : Codable> : Codable {
     var status: String?
     var message: String?
-    var result: T?
+//    var result: T?
+    var categories: T?
 }

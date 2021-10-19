@@ -10,6 +10,7 @@ import UIKit
 import MBProgressHUD
 import SwiftyJSON
 import Reachability
+import RxSwift
 
 enum HTTPMethod: String {
     case options = "OPTIONS"
@@ -28,25 +29,29 @@ class ApiManage: NSObject {
 }
 
 extension ApiManage {
-    func request<T : Codable>(router: RouterApi, showLoading: Bool = true, autoHide: Bool = true, completion: ((_ data : ResponseServerEntity<T>) -> Void)?) {
-        var returnEntity: ResponseServerEntity<T> = ResponseServerEntity()
-        self.displayLoading(showLoading)
-        if !Reachability.isConnectedToNetwork() {
-            returnEntity.message = ResponseErrorCode.NETWORK_ERROR.message()
-            returnEntity.result = nil
-            self.hideLoading(true)
-            if let block = completion {
-                block(returnEntity)
+    func request<T: Codable>(router: RouterApi, showLoading: Bool = true, autoHide: Bool = true) ->  Observable<ResponseServerEntity<T>> {
+        
+        return Observable.create { observer in
+            var returnEntity: ResponseServerEntity<T> = ResponseServerEntity()
+            self.displayLoading(showLoading)
+            
+            // Kiểm tra nếu kết nối mạng bị mất
+            if !Reachability.isConnectedToNetwork() {
+                returnEntity.message = ResponseErrorCode.NETWORK_ERROR.message()
+                returnEntity.categories = nil
+                self.hideLoading(true)
+                observer.onNext(returnEntity)
+                observer.onCompleted()
             }
-            return
-        }
-        let request = router.request()
-        task =  URLSession.shared.dataTask(with: request) { (data, response, error) in
-            do {
-                guard let data = data, error == nil else {
-                    if let block = completion {
+            
+            let request = router.request()
+            
+            self.task =  URLSession.shared.dataTask(with: request) { (data, response, error) in
+                do {
+                    guard let data = data, error == nil else {
+                        // Nếu có lỗi xảy ra
                         if let errors = error as? URLError {
-                            returnEntity.result = nil
+                            returnEntity.categories = nil
                             switch errors.code {
                             case .timedOut:
                                 returnEntity.message = ResponseErrorCode.TIMEOUT.message()
@@ -57,24 +62,23 @@ extension ApiManage {
                             }
                         }
                         self.hideLoading(true)
-                        block(returnEntity)
+                        observer.onNext(returnEntity)
+                        observer.onCompleted()
+                        return
                     }
-                    return
-                }
-                self.hideLoading(autoHide)
+                    self.hideLoading(autoHide)
 
-                if let httpStatus = response as? HTTPURLResponse {
-                    if let block = completion {
+                    if let httpStatus = response as? HTTPURLResponse {
                         if let json = try JSONSerialization.jsonObject(with: data, options: [.allowFragments]) as? [String: Any] {
                             if HTTPCode.success.contains(httpStatus.statusCode) {
                                 if let model : ResponseServerEntity<T> = Parser.parser(data : data) {
                                     returnEntity = model
                                     if T.self is BaseNullModel.Type, let result = BaseNullModel() as? T {
-                                        returnEntity.result = result
+                                        returnEntity.categories = result
                                     }
                                 } else {
                                     returnEntity.message = json["message"] as? String
-                                    returnEntity.result = nil
+                                    returnEntity.categories = nil
                                 }
                             } else {
                                 switch httpStatus.statusCode {
@@ -86,43 +90,112 @@ extension ApiManage {
 //                                        returnEntity.message = json["message"] as? String
 //                                        returnEntity.result = nil
 //                                    }
-                                    returnEntity.result = nil
+                                    returnEntity.categories = nil
                                 default:
                                     returnEntity.message = json["message"] as? String
-                                    returnEntity.result = nil
+                                    returnEntity.categories = nil
                                 }
                             }
                         } else {
-                            returnEntity.result = nil
+                            returnEntity.categories = nil
                             returnEntity.message = ResponseErrorCode.JSON_ERROR.message()
                         }
-                        block(returnEntity)
+                        observer.onNext(returnEntity)
+                        observer.onCompleted()
                     }
+                } catch let error as NSError {
+                    returnEntity.message = error.description
+                    observer.onNext(returnEntity)
+                    observer.onCompleted()
                 }
-            } catch let error as NSError {
-                returnEntity.message = error.description
-                completion?(returnEntity)
             }
+            
+            self.task?.resume()
+            
+            return Disposables.create()
         }
-
-        task?.resume()
     }
+}
 
-//    private func retryRefresh<T : Codable>(router : RouterApi, completion:  ((_ data : ResponseServerEntity<T>) -> Void)?) {
-//        self.request(router: .refreshToken(RefreshTokenModel(refreshToken: LocalResourceRepository.getRefreshToken(), deviceToken: LocalResourceRepository.getDeviceToken()))) {[weak self] (data: ResponseServerEntity<LoginModel>)  in
-//            if let self = self, let data = data.result {
-//                LocalResourceRepository.setToken(result: data)
-//                self.request(router: router) { (data: ResponseServerEntity<T>) in
-//                    guard let completion = completion else {return}
-//                    completion(data)
-//                }
-//            } else {
-//                self?.task?.cancel()
-//                self?.task = nil
-//                AppRouter.setRootView()
+extension ApiManage {
+//    func request<T : Codable>(router: RouterApi, showLoading: Bool = true, autoHide: Bool = true, completion: ((_ data : ResponseServerEntity<T>) -> Void)?) {
+//        var returnEntity: ResponseServerEntity<T> = ResponseServerEntity()
+//        self.displayLoading(showLoading)
+//        if !Reachability.isConnectedToNetwork() {
+//            returnEntity.message = ResponseErrorCode.NETWORK_ERROR.message()
+//            returnEntity.items = nil
+//            self.hideLoading(true)
+//            if let block = completion {
+//                block(returnEntity)
 //            }
-//
+//            return
 //        }
+//        let request = router.request()
+//        task =  URLSession.shared.dataTask(with: request) { (data, response, error) in
+//            do {
+//                guard let data = data, error == nil else {
+//                    if let block = completion {
+//                        if let errors = error as? URLError {
+//                            returnEntity.items = nil
+//                            switch errors.code {
+//                            case .timedOut:
+//                                returnEntity.message = ResponseErrorCode.TIMEOUT.message()
+//                            case .notConnectedToInternet:
+//                                returnEntity.message = ResponseErrorCode.NETWORK_ERROR.message()
+//                            default:
+//                                returnEntity.message = ResponseErrorCode.HTTP_ERROR.message()
+//                            }
+//                        }
+//                        self.hideLoading(true)
+//                        block(returnEntity)
+//                    }
+//                    return
+//                }
+//                self.hideLoading(autoHide)
+//
+//                if let httpStatus = response as? HTTPURLResponse {
+//                    if let block = completion {
+//                        if let json = try JSONSerialization.jsonObject(with: data, options: [.allowFragments]) as? [String: Any] {
+//                            if HTTPCode.success.contains(httpStatus.statusCode) {
+//                                if let model : ResponseServerEntity<T> = Parser.parser(data : data) {
+//                                    returnEntity = model
+//                                    if T.self is BaseNullModel.Type, let result = BaseNullModel() as? T {
+//                                        returnEntity.items = result
+//                                    }
+//                                } else {
+//                                    returnEntity.message = json["message"] as? String
+//                                    returnEntity.items = nil
+//                                }
+//                            } else {
+//                                switch httpStatus.statusCode {
+//                                case HTTPCode.unauthorized:
+////                                    if let statusCode = json["status"] as? String, statusCode == "119" {
+////                                        self.retryRefresh(router: router, completion: block)
+////                                    } else {
+////                                        returnEntity.status = json["status"] as? String
+////                                        returnEntity.message = json["message"] as? String
+////                                        returnEntity.result = nil
+////                                    }
+//                                    returnEntity.items = nil
+//                                default:
+//                                    returnEntity.message = json["message"] as? String
+//                                    returnEntity.items = nil
+//                                }
+//                            }
+//                        } else {
+//                            returnEntity.items = nil
+//                            returnEntity.message = ResponseErrorCode.JSON_ERROR.message()
+//                        }
+//                        block(returnEntity)
+//                    }
+//                }
+//            } catch let error as NSError {
+//                returnEntity.message = error.description
+//                completion?(returnEntity)
+//            }
+//        }
+//
+//        task?.resume()
 //    }
 
     private func dataToJSON(data: Data) -> Any? {

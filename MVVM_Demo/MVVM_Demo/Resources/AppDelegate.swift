@@ -17,8 +17,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         window = UIWindow(frame: UIScreen.main.bounds)
         window?.makeKeyAndVisible()
         
-        let dashboard = RouterType.login.getVc()
-        let nav = UINavigationController(rootViewController: dashboard)
+//        let dashboard = RouterType.category.getVc()
+//        let nav = UINavigationController(rootViewController: dashboard)
+//        nav.isNavigationBarHidden = true
+//        window?.rootViewController = nav
+        
+        let navigator = CategoryNavigator(
+            navigationController: UINavigationController())
+        let usecase = CategoryUseCase()
+        let viewModel = CategoryViewModel(navigator: navigator, usecase: usecase)
+        let viewController = CategoryViewController.instantiate()
+        viewController.viewModel = viewModel
+        
+        let nav = UINavigationController(rootViewController: viewController)
         nav.isNavigationBarHidden = true
         window?.rootViewController = nav
         

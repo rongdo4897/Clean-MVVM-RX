@@ -10,6 +10,16 @@ pod 'MBProgressHUD'
 pod 'Reachability'
 pod 'Alamofire', '~> 5.2'
 pod 'Kingfisher'
+pod 'Then'
+pod 'Reusable'
+
+# Rx
+pod 'RxSwift'
+pod 'NSObject+Rx'
+pod 'RxDataSources'
+
+# Clean Architecture
+pod 'MGArchitecture'
 
   # Pods for MVVM_Demo
 

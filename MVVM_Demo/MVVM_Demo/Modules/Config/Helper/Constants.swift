@@ -12,11 +12,7 @@ class Constants {
     static let timeOut = TimeInterval(30)
     
     // storyboard
-    static let tabbar: String = "Tabbar"
-    static let main: String = "Main"
-    static let dashbord: String = "Dashboard"
-    static let authentication: String = "Authentication"
-    static let github: String = "Github"
+    static let category: String = "Category"
 }
 
 class Define {

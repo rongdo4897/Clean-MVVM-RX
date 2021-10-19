@@ -10,6 +10,7 @@ import UIKit
 
 enum RouterApi {
     case github
+    case category
 }
 
 extension RouterApi {
@@ -18,6 +19,8 @@ extension RouterApi {
             switch self {
             case .github:
                 return .get
+            case .category:
+                return .get
             }
         }
 
@@ -25,6 +28,8 @@ extension RouterApi {
             var param = [String: Any]()
             switch self {
             case .github:
+                param = [:]
+            case .category:
                 param = [:]
             }
             return param
@@ -35,6 +40,8 @@ extension RouterApi {
             switch self {
             case .github:
                 relativePath = ApiClient.githubUrl
+            case .category:
+                relativePath = ApiClient.categoryUrl
             }
             return relativePath
         }()
