@@ -1,0 +1,15 @@
+//
+//  Staging.xcconfig
+//  MVVM_Demo
+//
+//  Created by Huong Nguyen on 19/10/2021.
+//
+
+// Configuration settings file format documentation can be found at:
+// https://help.apple.com/xcode/#/dev745c5c974
+
+ROOT_URL = https:/$()/
+// Keys
+
+APP_NAME = Traveldy(Staging)
+APP_BUNDLE_ID = com.traveldy.staging

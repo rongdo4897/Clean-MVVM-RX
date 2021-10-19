@@ -11,6 +11,21 @@ import SwiftyJSON
 
 class LocalResourceRepository {
     static let userDefault = UserDefaults.standard
+    
+    static func getAccessToken() -> String? {
+        guard let token = userDefault.string(forKey: Constants.accessToken) else {
+            return nil
+        }
+        return token
+    }
+
+    static func setAccessToken(accessToken: String?) {
+        guard let accessToken = accessToken else {
+            return
+        }
+        userDefault.set(accessToken, forKey: Constants.accessToken)
+        userDefault.synchronize()
+    }
 }
 
 struct Parser {

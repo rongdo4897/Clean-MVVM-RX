@@ -16,6 +16,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Override point for customization after application launch.
         window = UIWindow(frame: UIScreen.main.bounds)
         window?.makeKeyAndVisible()
+        print(Environment.rootURL)
         
 //        let dashboard = RouterType.category.getVc()
 //        let nav = UINavigationController(rootViewController: dashboard)

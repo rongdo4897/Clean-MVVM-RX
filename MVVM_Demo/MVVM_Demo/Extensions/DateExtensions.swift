@@ -15,3 +15,17 @@ extension Date {
         return dateFormatter.string(from: self)
     }
 }
+
+extension TimeZone {
+
+    func timeZoneOffsetInHours() -> Int {
+        let seconds = secondsFromGMT()
+        let hours = seconds/3600
+        return hours
+    }
+    func timeZoneOffsetInMinutes() -> Int {
+        let seconds = secondsFromGMT()
+        let minutes = abs(seconds / 60)
+        return minutes
+    }
+}
