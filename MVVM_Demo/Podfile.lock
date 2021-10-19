@@ -1,7 +1,7 @@
 PODS:
   - Alamofire (5.4.4)
   - Differentiator (4.0.1)
-  - Kingfisher (7.1.1)
+  - Kingfisher (7.0.0)
   - MBProgressHUD (1.2.0)
   - MGArchitecture (2.0.1):
     - RxCocoa (~> 5.1)
@@ -60,7 +60,7 @@ SPEC REPOS:
 SPEC CHECKSUMS:
   Alamofire: f3b09a368f1582ab751b3fff5460276e0d2cf5c9
   Differentiator: 886080237d9f87f322641dedbc5be257061b0602
-  Kingfisher: f738f9c4a3415823b8e2985d10aa2d6a9f37bc4d
+  Kingfisher: 5efc54fec3980f92354898532e562cc17f31efb4
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
   MGArchitecture: 7d586fc5fe15c3fa86dc06b0e6a06d7aafbf8051
   "NSObject+Rx": fa6bbcc1ab1faa06b01466bc09b1e0692bbc5946
@@ -75,4 +75,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: c478d9c06afcb1ada7453f23f18287c87a3c1353
 
-COCOAPODS: 1.10.1
+COCOAPODS: 1.11.2

@@ -46,26 +46,25 @@ extension RouterApi {
             return relativePath
         }()
         
-        var urlRequest = URLRequest(url: URL(string: url)!)
-//        var header : [String : String] = [:]
-//        if let token = LocalResourceRepository.getAccessToken() {
-//            header[Constants.authorization] = "Bearer \(token)"
-//        }
-//
-//        header["X-CmdId"] = Defined.devideId
-//        header["X-Timezone-Offset"] = TimeZone.current.timeZoneOffsetInMinutes().description
-//        header["Content-Type"] = "application/json"
-        
+        var urlRequest = URLRequest(url: URL(string: "\(Environment.rootURL)\(url)")!)
+        var header : [String : String] = [:]
+        if let token = LocalResourceRepository.getAccessToken() {
+            header[Constants.authorization] = "Bearer \(token)"
+        }
+
+        header["X-CmdId"] = Defined.devideId
+        header["X-Timezone-Offset"] = TimeZone.current.timeZoneOffsetInMinutes().description
+        header["Content-Type"] = "application/json"
         switch method {
         case .get:
             if let param = params?.stringFromHttpParameters() {
-                urlRequest = URLRequest(url: URL(string: "\(url)\(param)")!)
+                urlRequest = URLRequest(url: URL(string: "\(Environment.rootURL)\(url)\(param)")!)
             } else {
-                urlRequest = URLRequest(url: URL(string: "\(url)")!)
+                urlRequest = URLRequest(url: URL(string: "\(Environment.rootURL)\(url)")!)
             }
             urlRequest.httpMethod = HTTPMethod.get.rawValue
         case .post, .put, .delete:
-            urlRequest = URLRequest(url: URL(string: url)!)
+            urlRequest = URLRequest(url: URL(string: "\(Environment.rootURL)\(url)")!)
             if let param = params {
                 do {
                     let bodyData = try JSONSerialization.data(withJSONObject: param, options:[])
@@ -78,7 +77,7 @@ extension RouterApi {
         default:
             break
         }
-//        urlRequest.allHTTPHeaderFields = header
+        urlRequest.allHTTPHeaderFields = header
         urlRequest.timeoutInterval = Constants.timeOut
 
         return urlRequest

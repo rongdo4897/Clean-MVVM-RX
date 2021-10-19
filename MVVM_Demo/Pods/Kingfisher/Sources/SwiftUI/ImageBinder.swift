@@ -38,10 +38,9 @@ extension KFImage {
         init() {}
 
         var downloadTask: DownloadTask?
-        private var loading = false
 
         var loadingOrSucceeded: Bool {
-            return loading || loadedImage != nil
+            return downloadTask != nil || loadedImage != nil
         }
 
         @Published var loaded = false
@@ -49,6 +48,9 @@ extension KFImage {
         @Published var progress: Progress = .init()
 
         func start<HoldingView: KFImageHoldingView>(context: Context<HoldingView>) {
+
+            guard !loadingOrSucceeded else { return }
+
             guard let source = context.source else {
                 CallbackQueue.mainCurrentOrAsync.execute {
                     context.onFailureDelegate.call(KingfisherError.imageSettingError(reason: .emptySource))
@@ -56,8 +58,6 @@ extension KFImage {
                 return
             }
 
-            loading = true
-            
             progress = .init()
             downloadTask = KingfisherManager.shared
                 .retrieveImage(
@@ -71,13 +71,10 @@ extension KFImage {
 
                         guard let self = self else { return }
 
-                        CallbackQueue.mainCurrentOrAsync.execute {
-                            self.downloadTask = nil
-                            self.loading = false
-                        }
-                        
+                        self.downloadTask = nil
                         switch result {
                         case .success(let value):
+
                             CallbackQueue.mainCurrentOrAsync.execute {
                                 self.loadedImage = value.image
                                 let animation = context.fadeTransitionDuration(cacheType: value.cacheType)
@@ -89,13 +86,6 @@ extension KFImage {
                                 context.onSuccessDelegate.call(value)
                             }
                         case .failure(let error):
-                            CallbackQueue.mainCurrentOrAsync.execute {
-                                if let image = context.options.onFailureImage {
-                                    self.loadedImage = image
-                                }
-                                self.loaded = true
-                            }
-                            
                             CallbackQueue.mainAsync.execute {
                                 context.onFailureDelegate.call(error)
                             }
@@ -113,7 +103,6 @@ extension KFImage {
         func cancel() {
             downloadTask?.cancel()
             downloadTask = nil
-            loading = false
         }
     }
 }
